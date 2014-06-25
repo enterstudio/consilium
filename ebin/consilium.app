@@ -3,7 +3,7 @@
               {vsn,"1"},
               {modules,[clicks_resource,consilium,consilium_app,
                         consilium_resource,consilium_sup,credit_resource,
-                        register_resource]},
+                        register_resource,stats_resource]},
               {registered,[]},
               {applications,[kernel,stdlib,inets,crypto,mochiweb,webmachine]},
               {mod,{consilium_app,[]}},
