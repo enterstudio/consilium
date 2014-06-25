@@ -1,5 +1,5 @@
-%% @author author <author@example.com>
-%% @copyright YYYY author.
+%% @author Cameron Dykes <yellow5c@gmail.com>
+%% @copyright 2014 author.
 %% @doc Example webmachine_resource.
 
 -module(consilium_resource).

@@ -1,10 +1,10 @@
-%% @author author <author@example.com>
-%% @copyright YYYY author.
+%% @author Cameron Dykes <yellow5c@gmail.com>
+%% @copyright 2014 author.
 
 %% @doc consilium startup code
 
 -module(consilium).
--author('author <author@example.com>').
+-author('Cameron Dykes <yellow5c@gmail.com>').
 -export([start/0, start_link/0, stop/0]).
 
 ensure_started(App) ->
