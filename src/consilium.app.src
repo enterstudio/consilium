@@ -1,0 +1,18 @@
+%%-*- mode: erlang -*-
+{application, consilium,
+ [
+  {description, "consilium"},
+  {vsn, "1"},
+  {modules, []},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib,
+                  inets,
+                  crypto,
+                  mochiweb,
+                  webmachine
+                 ]},
+  {mod, { consilium_app, []}},
+  {env, []}
+ ]}.
