@@ -2,7 +2,7 @@
              [{description,"consilium"},
               {vsn,"1"},
               {modules,[consilium,consilium_app,consilium_resource,
-                        consilium_sup]},
+                        consilium_sup,register_resource]},
               {registered,[]},
               {applications,[kernel,stdlib,inets,crypto,mochiweb,webmachine]},
               {mod,{consilium_app,[]}},
