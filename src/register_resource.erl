@@ -3,17 +3,44 @@
 %% @doc register webmachine_resource.
 
 -module(register_resource).
--export([init/1, content_types_provided/2, to_json/2]).
+-export([init/1, allowed_methods/2, content_types_provided/2]).
+-export([process_post/2]).
 
 -include_lib("webmachine/include/webmachine.hrl").
 
 init([]) -> {ok, undefined}.
 
+allowed_methods(ReqData, State) ->
+    {['HEAD','POST'], ReqData, State}.
+
 content_types_provided(ReqData, State) ->
     {[ {"application/json", to_json} ], ReqData, State}.
 
-to_json(ReqData, State) ->
-    Resp = mochijson:encode({struct, [
-                                        {id, 1}
-                                     ]}),
-    {Resp, ReqData, State}.
+process_post(ReqData, State) ->
+    case extract_email_and_password(ReqData) of
+        {false,_} ->
+            Error = mochijson:encode({struct, [
+                                               {"error",
+                                                "Missing required email for registration"}]}),
+            {{halt, 400}, wrq:append_to_response_body(Error, ReqData), State};
+        {_,false} ->
+            Error = mochijson:encode({struct, [
+                                               {"error",
+                                                "Missing required password for registration"}]}),
+            {{halt, 400}, wrq:append_to_response_body(Error, ReqData), State};
+        {Email,Pass} ->
+            Resp = mochijson:encode({struct, [ {Email, Pass} ]}),
+            {true, wrq:append_to_response_body(Resp, ReqData), State}
+    end.
+
+extract_email_and_password(ReqData) ->
+    {_, JsonBody} = mochijson:decode(wrq:req_body(ReqData)),
+    Email = extract_value_from_json("email", JsonBody),
+    Pass = extract_value_from_json("password", JsonBody),
+    {Email, Pass}.
+
+extract_value_from_json(Key, JsonBody) ->
+    case lists:keysearch(Key, 1, JsonBody) of
+        {_, {_, Value}} -> Value;
+        _ -> false
+    end.
