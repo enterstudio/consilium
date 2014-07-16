@@ -28,8 +28,9 @@ process_post(ReqData, State) ->
                                                {"error",
                                                 "Missing required password for registration"}]}),
             {{halt, 400}, wrq:append_to_response_body(Error, ReqData), State};
-        {Email,Pass} ->
-            Resp = mochijson:encode({struct, [ {Email, Pass} ]}),
+        ExtractedData ->
+            WebmasterId = consilium_webmaster:insert(ExtractedData),
+            Resp = mochijson:encode({struct, [ {"webmaster_id", WebmasterId} ]}),
             {true, wrq:append_to_response_body(Resp, ReqData), State}
     end.
 
