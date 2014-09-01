@@ -57,10 +57,13 @@ init([]) ->
     Web = {webmachine_mochiweb,
            {webmachine_mochiweb, start, [WebConfig]},
            permanent, 5000, worker, [mochiweb_socket_server]},
-    Webmasters = {consilium,
+    Webmasters = {consilium_webmaster,
                   {consilium_webmaster, start_link, []},
                   permanent, 5000, worker, [consilium_webmaster]},
-    Processes = [Webmasters, Web],
+    Stats = {consilium_stats,
+             {consilium_stats, start_link, []},
+             permanent, 5000, worker, [consilium_stats]},
+    Processes = [Webmasters, Stats, Web],
     {ok, { {one_for_one, 10, 10}, Processes} }.
 
 %%
