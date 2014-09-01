@@ -36,12 +36,6 @@ process_post(ReqData, State) ->
 
 extract_email_and_password(ReqData) ->
     {_, JsonBody} = mochijson:decode(wrq:req_body(ReqData)),
-    Email = extract_value_from_json("email", JsonBody),
-    Pass = extract_value_from_json("password", JsonBody),
+    Email = consilium_helpers:extract_value_from_json("email", JsonBody),
+    Pass = consilium_helpers:extract_value_from_json("password", JsonBody),
     {Email, Pass}.
-
-extract_value_from_json(Key, JsonBody) ->
-    case lists:keysearch(Key, 1, JsonBody) of
-        {_, {_, Value}} -> Value;
-        _ -> false
-    end.

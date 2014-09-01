@@ -36,12 +36,6 @@ process_post(ReqData, State) ->
 
 extract_request_values(ReqData) ->
     {_, JsonBody} = mochijson:decode(wrq:req_body(ReqData)),
-    WebmasterId = extract_value_from_json("webmaster_id", JsonBody),
-    WidgetId = extract_value_from_json("widget_id", JsonBody),
+    WebmasterId = consilium_helpers:extract_value_from_json("webmaster_id", JsonBody),
+    WidgetId = consilium_helpers:extract_value_from_json("widget_id", JsonBody),
     {WebmasterId, WidgetId}.
-
-extract_value_from_json(Key, JsonBody) ->
-    case lists:keysearch(Key, 1, JsonBody) of
-        {_, {_, Value}} -> Value;
-        _ -> false
-    end.
