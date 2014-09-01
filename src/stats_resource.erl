@@ -20,12 +20,12 @@ to_json(ReqData, State) ->
                                                 "Missing required webmaster_id"}]}),
             {{halt, 400}, wrq:append_to_response_body(Error, ReqData), State};
         {WebmasterId, WidgetId, Date} ->
-            {UniqueCount, RawCount, TotalSales, _Date} = consilium_stats:get_stats({WebmasterId, WidgetId, Date}),
+            {UniqueCount, RawCount, TotalSales, ReportDate} = consilium_stats:get_stats({WebmasterId, WidgetId, Date}),
             Resp = mochijson:encode({struct, [{"widget_id", WidgetId},
                                               {"unique_count", UniqueCount},
                                               {"raw_count", RawCount},
                                               {"total_sales", TotalSales},
-                                              {"date", consilium_helpers:formatted_date(Date)}]}),
+                                              {"date", consilium_helpers:formatted_date(ReportDate)}]}),
             {true, wrq:append_to_response_body(Resp, ReqData), State}
     end.
 
