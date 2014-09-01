@@ -19,15 +19,9 @@ content_types_provided(ReqData, State) ->
 process_post(ReqData, State) ->
     case extract_request_values(ReqData) of
         {false,_} ->
-            Error = mochijson:encode({struct, [
-                                               {"error",
-                                                "Missing required webmaster_id"}]}),
-            {{halt, 400}, wrq:append_to_response_body(Error, ReqData), State};
+            consilium_helpers:return_error("Missing required webmaster_id", ReqData, State);
         {_,false} ->
-            Error = mochijson:encode({struct, [
-                                               {"error",
-                                                "Missing required widget_id"}]}),
-            {{halt, 400}, wrq:append_to_response_body(Error, ReqData), State};
+            consilium_helpers:return_error("Missing required widget_id", ReqData, State);
         {WebmasterId, WidgetId} ->
             consilium_stats:track_click({WebmasterId, WidgetId}),
             Resp = mochijson:encode({struct, [ {"webmaster_id", WebmasterId} ]}),

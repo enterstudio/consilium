@@ -19,15 +19,9 @@ content_types_provided(ReqData, State) ->
 process_post(ReqData, State) ->
     case extract_email_and_password(ReqData) of
         {false,_} ->
-            Error = mochijson:encode({struct, [
-                                               {"error",
-                                                "Missing required email for registration"}]}),
-            {{halt, 400}, wrq:append_to_response_body(Error, ReqData), State};
+            consilium_helpers:return_error("Missing required email for registration", ReqData, State);
         {_,false} ->
-            Error = mochijson:encode({struct, [
-                                               {"error",
-                                                "Missing required password for registration"}]}),
-            {{halt, 400}, wrq:append_to_response_body(Error, ReqData), State};
+            consilium_helpers:return_error("Missing required password for registration", ReqData, State);
         ExtractedData ->
             WebmasterId = consilium_webmaster:insert(ExtractedData),
             Resp = mochijson:encode({struct, [ {"webmaster_id", WebmasterId} ]}),

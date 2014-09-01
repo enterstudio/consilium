@@ -15,10 +15,7 @@ content_types_provided(ReqData, State) ->
 to_json(ReqData, State) ->
     case extract_report_values(ReqData) of
         {false,_,_} ->
-            Error = mochijson:encode({struct, [
-                                               {"error",
-                                                "Missing required webmaster_id"}]}),
-            {{halt, 400}, wrq:append_to_response_body(Error, ReqData), State};
+            consilium_helpers:return_error("Missing required webmaster_id", ReqData, State);
         {WebmasterId, WidgetId, Date} ->
             {UniqueCount, RawCount, TotalSales, ReportDate} = consilium_stats:get_stats({WebmasterId, WidgetId, Date}),
             Resp = mochijson:encode({struct, [{"widget_id", WidgetId},
