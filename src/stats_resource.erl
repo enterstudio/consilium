@@ -13,7 +13,37 @@ content_types_provided(ReqData, State) ->
     {[ {"application/json", to_json} ], ReqData, State}.
 
 to_json(ReqData, State) ->
-    Resp = mochijson:encode({struct, [
-                                        {id, 4}
-                                     ]}),
-    {Resp, ReqData, State}.
+    case extract_report_values(ReqData) of
+        {false,_,_} ->
+            Error = mochijson:encode({struct, [
+                                               {"error",
+                                                "Missing required webmaster_id"}]}),
+            {{halt, 400}, wrq:append_to_response_body(Error, ReqData), State};
+        {WebmasterId, WidgetId, Date} ->
+            {UniqueCount, RawCount, TotalSales, _Date} = consilium_stats:get_stats({WebmasterId, WidgetId, Date}),
+            Resp = mochijson:encode({struct, [{"widget_id", WidgetId},
+                                              {"unique_count", UniqueCount},
+                                              {"raw_count", RawCount},
+                                              {"total_sales", TotalSales},
+                                              {"date", format_date(Date)}]}),
+            {true, wrq:append_to_response_body(Resp, ReqData), State}
+    end.
+
+extract_report_values(ReqData) ->
+    {_, JsonBody} = mochijson:decode(wrq:req_body(ReqData)),
+    WebmasterId = extract_value_from_json("webmaster_id", JsonBody),
+    WidgetId = extract_value_from_json("widget_id", JsonBody),
+    Date = date(),
+    {WebmasterId, WidgetId, Date}.
+
+extract_value_from_json(Key, JsonBody) ->
+    case lists:keysearch(Key, 1, JsonBody) of
+        {_, {_, Value}} -> Value;
+        _ -> false
+    end.
+
+format_date({Year,Month,Day}) ->
+    Y = integer_to_list(Year),
+    M = integer_to_list(Month),
+    D = integer_to_list(Day),
+    Y ++ "-" ++ M ++ "-" ++ D.
