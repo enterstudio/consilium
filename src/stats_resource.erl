@@ -25,7 +25,7 @@ to_json(ReqData, State) ->
                                               {"unique_count", UniqueCount},
                                               {"raw_count", RawCount},
                                               {"total_sales", TotalSales},
-                                              {"date", format_date(Date)}]}),
+                                              {"date", consilium_helpers:formatted_date(Date)}]}),
             {true, wrq:append_to_response_body(Resp, ReqData), State}
     end.
 
@@ -41,9 +41,3 @@ extract_value_from_json(Key, JsonBody) ->
         {_, {_, Value}} -> Value;
         _ -> false
     end.
-
-format_date({Year,Month,Day}) ->
-    Y = integer_to_list(Year),
-    M = integer_to_list(Month),
-    D = integer_to_list(Day),
-    Y ++ "-" ++ M ++ "-" ++ D.
