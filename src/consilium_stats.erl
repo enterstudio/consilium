@@ -1,7 +1,7 @@
 -module(consilium_stats).
 -behavior(gen_server).
 
--export([start_link/0, get_stats/1, track_click/1]).
+-export([start_link/0, get_stats/1, track_click/1, credit_sale/1]).
 -export([init/1, handle_call/3, handle_cast/2,
          handle_info/2, terminate/2, code_change/3]).
 
@@ -22,6 +22,9 @@ get_stats(ReportReq) ->
 
 track_click(Stat) ->
     gen_server:cast({global, ?MODULE}, {track, Stat}).
+
+credit_sale(Stat) ->
+    gen_server:cast({global, ?MODULE}, {credit, Stat}).
 
 %%% Private API
 
@@ -56,6 +59,24 @@ handle_cast({track, {WebmasterId, WidgetId}}, Stats) ->
                    _NotFound ->
                        Stat = #stats{webmaster_id = WebmasterId,
                                      widget_id = WidgetId},
+                       dict:store(Key, Stat, Stats)
+               end,
+    {noreply, NewStats};
+handle_cast({credit, {WebmasterId, WidgetId}}, Stats) ->
+    Key = {WebmasterId, WidgetId, date()},
+    NewStats = case dict:find(Key, Stats) of
+                   {ok, OldStat} ->
+                       Stat = #stats{webmaster_id = WebmasterId,
+                                     widget_id = WidgetId,
+                                     uniq = OldStat#stats.uniq,
+                                     raw = OldStat#stats.raw,
+                                     sales = OldStat#stats.sales + 1,
+                                     date = OldStat#stats.date},
+                       dict:update(Key, fun(_) -> Stat end, Stats);
+                   _NotFound ->
+                       Stat = #stats{webmaster_id = WebmasterId,
+                                     widget_id = WidgetId,
+                                     sales = 1},
                        dict:store(Key, Stat, Stats)
                end,
     {noreply, NewStats}.
