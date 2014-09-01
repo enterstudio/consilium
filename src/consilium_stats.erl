@@ -1,7 +1,7 @@
 -module(consilium_stats).
 -behavior(gen_server).
 
--export([start_link/0, get_stats/1]).
+-export([start_link/0, get_stats/1, track_click/1]).
 -export([init/1, handle_call/3, handle_cast/2,
          handle_info/2, terminate/2, code_change/3]).
 
@@ -20,6 +20,9 @@ start_link() ->
 get_stats(ReportReq) ->
     gen_server:call({global, ?MODULE}, ReportReq).
 
+track_click(Stat) ->
+    gen_server:cast({global, ?MODULE}, {track, Stat}).
+
 %%% Private API
 
 init([]) ->
@@ -32,16 +35,30 @@ handle_call({WebmasterId, WidgetId, Date}, _From, Stats) ->
             Report = {Stat#stats.uniq,
                       Stat#stats.raw,
                       Stat#stats.sales,
-                      Stat#stats.date
-                     },
+                      Stat#stats.date},
             {reply, Report, Stats};
         error ->
             EmptyReport = {0,0,0,date()},
             {reply, EmptyReport, Stats}
     end.
 
-handle_cast(_Msg, State) ->
-    {noreply, State}.
+handle_cast({track, {WebmasterId, WidgetId}}, Stats) ->
+    Key = {WebmasterId, WidgetId, date()},
+    NewStats = case dict:find(Key, Stats) of
+                   {ok, OldStat} ->
+                       Stat = #stats{webmaster_id = WebmasterId,
+                                     widget_id = WidgetId,
+                                     uniq = OldStat#stats.uniq,
+                                     raw = OldStat#stats.raw + 1,
+                                     sales = OldStat#stats.sales,
+                                     date = OldStat#stats.date},
+                       dict:update(Key, fun(_) -> Stat end, Stats);
+                   _NotFound ->
+                       Stat = #stats{webmaster_id = WebmasterId,
+                                     widget_id = WidgetId},
+                       dict:store(Key, Stat, Stats)
+               end,
+    {noreply, NewStats}.
 
 handle_info(_Info, State) ->
     {noreply, State}.
